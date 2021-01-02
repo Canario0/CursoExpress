@@ -3,6 +3,7 @@ import passport from "passport";
 import * as authController from "../controllers/auth";
 import * as teamsController from "../controllers/teams";
 import * as usersController from "../controllers/users";
+import axios from "axios";
 
 const router = express.Router();
 authController.setupAuth(passport);
@@ -41,9 +42,38 @@ router
     });
   });
 
-router.route("/pokemons/").post((req, res) => {
-  res.status(201).send("Hello world!");
-});
+router
+  .route("/pokemons/")
+  .post(passport.authenticate("jwt", { session: false }), (req, res) => {
+    if (!req.body) {
+      res.status(400).json({ message: "Missing pokemon's name data" });
+      return;
+    }
+    if (!req.body.name) {
+      res.status(400).json({ message: "Missing pokemon's name data" });
+      return;
+    }
+    const pokemonName: string = req.body.name;
+    console.log("Calling pokeapi");
+    axios
+      .get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
+      .then(function (response) {
+        // handle success
+        teamsController.addPokemon(req.user!.userId, {
+          name: pokemonName,
+          pokedexNum: response.data.id,
+        });
+        res.status(201).json({
+          trainer: usersController.getUserNameFromId(req.user!.userId),
+          team: teamsController.getTeamByUuid(req.user!.userId),
+        });
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+        res.status(400).json({ message: error });
+      });
+  });
 
 router.route("/pokemons/:id").delete((req, res) => {
   res.status(200).send("Hello world!");

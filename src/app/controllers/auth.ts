@@ -13,7 +13,7 @@ function setupAuth(passport: PassportStatic): void {
   };
   passport.use(
     new JwtStrategy(options, (decoded, done) => {
-      console.log("decoded jwt", decoded);
+      /* console.log("decoded jwt", decoded); */
       // Cuando lo tengamos todo implementado deberíamos devolver done con el usuario
       // y los errores
       return done(null, decoded);

@@ -1,12 +1,7 @@
 import * as uuid from "uuid";
 import { comparePassword, hashPasswordSync } from "./crypto";
 import * as teamsController from "./teams";
-
-interface User {
-  userName: string;
-  password: string;
-  salt: string;
-}
+import { User } from "../models/user";
 
 const userDatabase: Map<string, User> = new Map();
 // userId -> password cifrada
