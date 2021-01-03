@@ -4,7 +4,6 @@ import * as jwt from "jsonwebtoken";
 import { enviroment } from "../../enviroments/enviroment";
 
 export const router = express.Router();
-usersController.registerUser("test", "123");
 
 router.route("/").get((req, res) => {
   res.send("GET Auth router");

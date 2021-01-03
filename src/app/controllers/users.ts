@@ -17,6 +17,10 @@ function registerUser(userName: string, password: string) {
   teamsController.createTeam(userUuid);
 }
 
+function cleanUserDatabase(): void {
+  userDatabase.clear();
+}
+
 function getUserNameFromId(uuid: string): string | null {
   const user = userDatabase.get(uuid);
   if (!user) return null;
@@ -49,4 +53,5 @@ export {
   checkUserCredentials,
   getUserIdFromUserName,
   getUserNameFromId,
+  cleanUserDatabase,
 };

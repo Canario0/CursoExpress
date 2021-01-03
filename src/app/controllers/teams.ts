@@ -2,6 +2,10 @@ import { Pokemon } from "../models/pokemon";
 
 const teamsDatabase: Map<string, Pokemon[]> = new Map();
 
+function cleanTeamDataBase(): void {
+  teamsDatabase.forEach((_, key) => teamsDatabase.set(key, []));
+}
+
 function createTeam(uuid: string): void {
   teamsDatabase.set(uuid, []);
 }
@@ -21,4 +25,4 @@ function setTeam(uuid: string, team: Pokemon[]): Pokemon[] {
 function getTeamByUuid(uuid: string): Pokemon[] | null {
   return teamsDatabase.get(uuid) || null;
 }
-export { createTeam, addPokemon, setTeam, getTeamByUuid };
+export { createTeam, addPokemon, setTeam, getTeamByUuid, cleanTeamDataBase };

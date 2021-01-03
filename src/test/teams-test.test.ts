@@ -1,10 +1,15 @@
 import { default as chai } from "chai";
 import { default as chaiHttp } from "chai-http";
-import { Pokemon } from "../app/models/pokemon";
 import { app } from "../index";
+import * as teamsController from "../app/controllers/teams";
 
 chai.use(chaiHttp);
 
+beforeEach((done) => {
+  console.log("Before teams");
+  teamsController.cleanTeamDataBase();
+  done();
+});
 describe("Test suite for teams endpoint", () => {
   it("Get should return the team of the given user", (done) => {
     const team = [{ name: "Charizar" }, { name: "Blastoise" }];
@@ -84,11 +89,9 @@ describe("Test suite for teams endpoint", () => {
             chai.assert.equal(res.status, 201);
             chai.assert.equal(res.body.trainer, "test");
             chai.assert.exists(res.body.team);
-            const pokemonInfo = res.body.team.find(
-              (pokemon: Pokemon) => pokemon.name === pokemonName
-            );
-            chai.assert.exists(pokemonInfo, "Pokemon not found in the team");
-            chai.assert.equal(pokemonInfo.pokedexNum, 1);
+            chai.assert.lengthOf(res.body.team, 1);
+            chai.assert.equal(res.body.team[0].name, pokemonName);
+            chai.assert.equal(res.body.team[0].pokedexNum, 1);
             done();
           });
       });
