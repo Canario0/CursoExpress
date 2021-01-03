@@ -54,7 +54,6 @@ router
       return;
     }
     const pokemonName: string = req.body.name;
-    console.log("Calling pokeapi");
     axios
       .get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
       .then(function (response) {
@@ -75,8 +74,19 @@ router
       });
   });
 
-router.route("/pokemons/:id").delete((req, res) => {
-  res.status(200).send("Hello world!");
-});
+router
+  .route("/pokemons/:id")
+  .delete(passport.authenticate("jwt", { session: false }), (req, res) => {
+    const uuid = req.user!.userId;
+    const finalTeam = teamsController.deletePokemonByPosition(
+      uuid,
+      Number(req.params.id)
+    );
+    if (finalTeam == null) {
+      res.status(404).json({ message: "Team not found" });
+      return;
+    }
+    res.status(204).send();
+  });
 
 export { router };

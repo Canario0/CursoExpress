@@ -25,4 +25,22 @@ function setTeam(uuid: string, team: Pokemon[]): Pokemon[] {
 function getTeamByUuid(uuid: string): Pokemon[] | null {
   return teamsDatabase.get(uuid) || null;
 }
-export { createTeam, addPokemon, setTeam, getTeamByUuid, cleanTeamDataBase };
+
+function deletePokemonByPosition(
+  uuid: string,
+  pokemonNum: number
+): Pokemon[] | null {
+  const team = teamsDatabase.get(uuid);
+  if (!team) return null;
+  team.splice(pokemonNum, 1);
+  return team;
+}
+
+export {
+  createTeam,
+  addPokemon,
+  setTeam,
+  getTeamByUuid,
+  cleanTeamDataBase,
+  deletePokemonByPosition,
+};

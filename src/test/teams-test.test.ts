@@ -104,13 +104,43 @@ describe("Test suite for teams endpoint", () => {
           });
       });
   });
+
   it("Delete a pokemon, should remove it from my team", (done) => {
+    const team = [{ name: "Charizar" }, { name: "Blastoise" }];
     chai
       .request(app)
-      .delete("/teams/pokemons/1")
+      .post("/auth/login")
+      .type("json")
+      .send({ user: "test", password: "123" })
       .end((err, res) => {
-        chai.assert.equal(res.status, 200);
-        done();
+        const token = res.body.token;
+        chai
+          .request(app)
+          .put("/teams")
+          .set("Authorization", `Bearer ${token}`)
+          .type("json")
+          .send({ trainer: "test", team: team })
+          .end((err, res) => {
+            chai
+              .request(app)
+              .delete("/teams/pokemons/0")
+              .set("Authorization", `Bearer ${token}`)
+              .end((err, res) => {
+                chai.assert.equal(res.status, 204);
+                chai
+                  .request(app)
+                  .get("/teams")
+                  .set("Authorization", `Bearer ${token}`)
+                  .end((err, res) => {
+                    chai.assert.equal(res.status, 200);
+                    chai.assert.equal(res.body.trainer, "test");
+                    chai.assert.exists(res.body.team);
+                    chai.assert.lengthOf(res.body.team, 1);
+                    chai.assert.equal(res.body.team[0].name, team[1].name);
+                    done();
+                  });
+              });
+          });
       });
   });
 });
