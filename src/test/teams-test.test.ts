@@ -5,12 +5,20 @@ import * as teamsController from "../app/controllers/teams";
 
 chai.use(chaiHttp);
 
-beforeEach((done) => {
-  console.log("Before teams");
-  teamsController.cleanTeamDataBase();
-  done();
-});
 describe("Test suite for teams endpoint", () => {
+  before((done) => {
+    console.log("before teams suite only");
+    done();
+  });
+  beforeEach((done) => {
+    console.log("Before teams");
+    teamsController.cleanTeamDataBase();
+    done();
+  });
+  after((done) => {
+    console.log("afer teams suite only");
+    done();
+  });
   it("Get should return the team of the given user", (done) => {
     const team = [{ name: "Charizar" }, { name: "Blastoise" }];
     chai
