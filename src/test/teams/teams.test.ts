@@ -10,10 +10,9 @@ describe("Test suite for teams endpoint", () => {
     /* console.log("before teams suite only"); */
     done();
   });
-  beforeEach((done) => {
+  beforeEach(async () => {
     /* console.log("Before teams"); */
-    teamsController.cleanTeamDataBase();
-    done();
+    await teamsController.cleanTeamDataBase();
   });
   after((done) => {
     /* console.log("afer teams suite only"); */

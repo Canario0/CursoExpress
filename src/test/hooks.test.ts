@@ -1,13 +1,11 @@
 import * as usersController from "../app/auth/user.controller";
 
-before((done) => {
-  usersController.registerUser("test", "123");
+before(async () => {
+  await usersController.registerUser("test", "123");
   /* console.log("Global before"); */
-  done();
 });
 
-after((done) => {
+after(async () => {
   /* console.log("Global after"); */
-  usersController.cleanUserDatabase();
-  done();
+  await usersController.cleanUserDatabase();
 });

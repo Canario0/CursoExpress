@@ -2,36 +2,38 @@ import { Pokemon } from "../models/pokemon";
 
 const teamsDatabase: Map<string, Pokemon[]> = new Map();
 
-function cleanTeamDataBase(): void {
+async function cleanTeamDataBase(): Promise<void> {
   teamsDatabase.forEach((_, key) => teamsDatabase.set(key, []));
 }
 
-function createTeam(uuid: string): void {
+async function createTeam(uuid: string): Promise<void> {
   teamsDatabase.set(uuid, []);
 }
 
-function addPokemon(uuid: string, pokemon: Pokemon): Pokemon[] | null {
+async function addPokemon(uuid: string, pokemon: Pokemon): Promise<Pokemon[]> {
   const team = teamsDatabase.get(uuid);
-  if (!team) return null;
+  if (team == null) throw new Error("Team not found");
   team.push(pokemon);
   return team;
 }
 
-function setTeam(uuid: string, team: Pokemon[]): Pokemon[] {
+async function setTeam(uuid: string, team: Pokemon[]): Promise<Pokemon[]> {
   teamsDatabase.set(uuid, team);
   return teamsDatabase.get(uuid)!;
 }
 
-function getTeamByUuid(uuid: string): Pokemon[] | null {
-  return teamsDatabase.get(uuid) || null;
+async function getTeamByUuid(uuid: string): Promise<Pokemon[]> {
+  const team = teamsDatabase.get(uuid);
+  if (team == null) throw new Error("Team not found");
+  return team!;
 }
 
-function deletePokemonByPosition(
+async function deletePokemonByPosition(
   uuid: string,
   pokemonNum: number
-): Pokemon[] | null {
+): Promise<Pokemon[]> {
   const team = teamsDatabase.get(uuid);
-  if (!team) return null;
+  if (!team) throw new Error("Team not found");
   team.splice(pokemonNum, 1);
   return team;
 }

@@ -13,10 +13,9 @@ function hashPasswordSync(plainPassword: string): string {
 
 function comparePassword(
   plainPassword: string,
-  hashPassword: string,
-  done: (err: Error, same: boolean) => void
-) {
-  bcrypt.compare(plainPassword, hashPassword, done);
+  hashPassword: string
+): Promise<boolean> {
+  return bcrypt.compare(plainPassword, hashPassword);
 }
 
 export { hashPassword, hashPasswordSync, comparePassword };

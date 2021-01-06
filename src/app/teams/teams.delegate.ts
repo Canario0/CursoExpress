@@ -3,19 +3,19 @@ import * as usersController from "../auth/user.controller";
 import * as teamsController from "./teams.controller";
 import axios from "axios";
 
-function getTeamFromUser(req: Request, res: Response): void {
-  const team = teamsController.getTeamByUuid(req.user!.userId);
-  if (team == null) {
-    res.status(404).json({ message: "Team not found" });
-    return;
+async function getTeamFromUser(req: Request, res: Response): Promise<void> {
+  try {
+    const team = await teamsController.getTeamByUuid(req.user!.userId);
+    res.status(200).json({
+      trainer: await usersController.getUserNameFromId(req.user!.userId),
+      team,
+    });
+  } catch (error) {
+    res.status(404).json({ message: error.message });
   }
-  res.status(200).json({
-    trainer: usersController.getUserNameFromId(req.user!.userId),
-    team,
-  });
 }
 
-function setTeamdFromUser(req: Request, res: Response): void {
+async function setTeamdFromUser(req: Request, res: Response): Promise<void> {
   if (!req.body) {
     res.status(400).json({ message: "Missing team data" });
     return;
@@ -28,14 +28,14 @@ function setTeamdFromUser(req: Request, res: Response): void {
     res.status(400).json({ message: "Missing team data" });
     return;
   }
-
+  const team = await teamsController.setTeam(req.user!.userId, req.body.team);
   res.status(200).json({
-    trainer: usersController.getUserNameFromId(req.user!.userId),
-    team: teamsController.setTeam(req.user!.userId, req.body.team),
+    trainer: await usersController.getUserNameFromId(req.user!.userId),
+    team,
   });
 }
 
-function setPokemonToTeam(req: Request, res: Response): void {
+async function setPokemonToTeam(req: Request, res: Response): Promise<void> {
   if (!req.body) {
     res.status(400).json({ message: "Missing pokemon's name data" });
     return;
@@ -45,36 +45,51 @@ function setPokemonToTeam(req: Request, res: Response): void {
     return;
   }
   const pokemonName: string = req.body.name;
-  axios
-    .get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
-    .then(function (response) {
-      // handle success
-      teamsController.addPokemon(req.user!.userId, {
+  try {
+    const pokemonData = await axios.get(
+      `https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`
+    );
+    try {
+      await teamsController.addPokemon(req.user!.userId, {
         name: pokemonName,
-        pokedexNum: response.data.id,
+        pokedexNum: pokemonData.data.id,
       });
+    } catch (error) {
+      res.status(500).json({
+        message: error.message,
+      });
+      return;
+    }
+    try {
+      const team = await teamsController.getTeamByUuid(req.user!.userId);
       res.status(201).json({
-        trainer: usersController.getUserNameFromId(req.user!.userId),
-        team: teamsController.getTeamByUuid(req.user!.userId),
+        trainer: await usersController.getUserNameFromId(req.user!.userId),
+        team,
       });
-    })
-    .catch(function (error) {
-      // handle error
-      res.status(400).json({ message: error });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error while getting team after the pokemon was added",
+      });
+      return;
+    }
+  } catch (error) {
+    res.status(400).json({
+      message: error,
     });
+  }
 }
 
-function deletePokemonFromTeam(req: Request, res: Response): void {
+async function deletePokemonFromTeam(
+  req: Request,
+  res: Response
+): Promise<void> {
   const uuid = req.user!.userId;
-  const finalTeam = teamsController.deletePokemonByPosition(
-    uuid,
-    Number(req.params.id)
-  );
-  if (finalTeam == null) {
-    res.status(404).json({ message: "Team not found" });
-    return;
+  try {
+    await teamsController.deletePokemonByPosition(uuid, Number(req.params.id));
+    res.status(204).send();
+  } catch (error) {
+    res.status(404).json({ message: error.message });
   }
-  res.status(204).send();
 }
 
 export {
