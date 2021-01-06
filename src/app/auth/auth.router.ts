@@ -1,5 +1,5 @@
 import { default as express } from "express";
-import * as usersController from "../controllers/users";
+import * as usersController from "../tools/users";
 import * as jwt from "jsonwebtoken";
 import { enviroment } from "../../enviroments/enviroment";
 

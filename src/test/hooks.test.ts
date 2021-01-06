@@ -1,8 +1,8 @@
-import * as usersController from "../app/controllers/users";
+import * as usersController from "../app/tools/users";
 
 before((done) => {
   usersController.registerUser("test", "123");
-  console.log("Global before");
+  /* console.log("Global before"); */
   done();
 });
 

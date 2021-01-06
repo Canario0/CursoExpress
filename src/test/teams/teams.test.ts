@@ -7,7 +7,7 @@ chai.use(chaiHttp);
 
 describe("Test suite for teams endpoint", () => {
   before((done) => {
-    console.log("before teams suite only");
+    /* console.log("before teams suite only"); */
     done();
   });
   beforeEach((done) => {
