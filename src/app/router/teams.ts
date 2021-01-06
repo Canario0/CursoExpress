@@ -12,7 +12,6 @@ router
   .route("/")
   .get(passport.authenticate("jwt", { session: false }), (req, res) => {
     const team = teamsController.getTeamByUuid(req.user!.userId);
-    console.log(team);
     if (team == null) {
       res.status(404).json({ message: "Team not found" });
       return;
@@ -69,7 +68,6 @@ router
       })
       .catch(function (error) {
         // handle error
-        console.log(error);
         res.status(400).json({ message: error });
       });
   });

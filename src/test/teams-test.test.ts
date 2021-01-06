@@ -7,16 +7,16 @@ chai.use(chaiHttp);
 
 describe("Test suite for teams endpoint", () => {
   before((done) => {
-    console.log("before teams suite only");
+    /* console.log("before teams suite only"); */
     done();
   });
   beforeEach((done) => {
-    console.log("Before teams");
+    /* console.log("Before teams"); */
     teamsController.cleanTeamDataBase();
     done();
   });
   after((done) => {
-    console.log("afer teams suite only");
+    /* console.log("afer teams suite only"); */
     done();
   });
   it("Get should return the team of the given user", (done) => {
