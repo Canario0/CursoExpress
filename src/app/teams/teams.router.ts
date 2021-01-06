@@ -1,16 +1,13 @@
 import express from "express";
-import passport from "passport";
-import * as authController from "../auth/auth.controller";
 import * as teamsController from "./teams.controller";
-import * as usersController from "../tools/users";
+import * as usersController from "../auth/user.controller";
 import axios from "axios";
 
 const router = express.Router();
-authController.setupAuth(passport);
 
 router
   .route("/")
-  .get(passport.authenticate("jwt", { session: false }), (req, res) => {
+  .get((req, res) => {
     const team = teamsController.getTeamByUuid(req.user!.userId);
     if (team == null) {
       res.status(404).json({ message: "Team not found" });
@@ -21,7 +18,7 @@ router
       team,
     });
   })
-  .put(passport.authenticate("jwt", { session: false }), (req, res) => {
+  .put((req, res) => {
     if (!req.body) {
       res.status(400).json({ message: "Missing team data" });
       return;
@@ -41,50 +38,46 @@ router
     });
   });
 
-router
-  .route("/pokemons/")
-  .post(passport.authenticate("jwt", { session: false }), (req, res) => {
-    if (!req.body) {
-      res.status(400).json({ message: "Missing pokemon's name data" });
-      return;
-    }
-    if (!req.body.name) {
-      res.status(400).json({ message: "Missing pokemon's name data" });
-      return;
-    }
-    const pokemonName: string = req.body.name;
-    axios
-      .get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
-      .then(function (response) {
-        // handle success
-        teamsController.addPokemon(req.user!.userId, {
-          name: pokemonName,
-          pokedexNum: response.data.id,
-        });
-        res.status(201).json({
-          trainer: usersController.getUserNameFromId(req.user!.userId),
-          team: teamsController.getTeamByUuid(req.user!.userId),
-        });
-      })
-      .catch(function (error) {
-        // handle error
-        res.status(400).json({ message: error });
+router.route("/pokemons/").post((req, res) => {
+  if (!req.body) {
+    res.status(400).json({ message: "Missing pokemon's name data" });
+    return;
+  }
+  if (!req.body.name) {
+    res.status(400).json({ message: "Missing pokemon's name data" });
+    return;
+  }
+  const pokemonName: string = req.body.name;
+  axios
+    .get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`)
+    .then(function (response) {
+      // handle success
+      teamsController.addPokemon(req.user!.userId, {
+        name: pokemonName,
+        pokedexNum: response.data.id,
       });
-  });
+      res.status(201).json({
+        trainer: usersController.getUserNameFromId(req.user!.userId),
+        team: teamsController.getTeamByUuid(req.user!.userId),
+      });
+    })
+    .catch(function (error) {
+      // handle error
+      res.status(400).json({ message: error });
+    });
+});
 
-router
-  .route("/pokemons/:id")
-  .delete(passport.authenticate("jwt", { session: false }), (req, res) => {
-    const uuid = req.user!.userId;
-    const finalTeam = teamsController.deletePokemonByPosition(
-      uuid,
-      Number(req.params.id)
-    );
-    if (finalTeam == null) {
-      res.status(404).json({ message: "Team not found" });
-      return;
-    }
-    res.status(204).send();
-  });
+router.route("/pokemons/:id").delete((req, res) => {
+  const uuid = req.user!.userId;
+  const finalTeam = teamsController.deletePokemonByPosition(
+    uuid,
+    Number(req.params.id)
+  );
+  if (finalTeam == null) {
+    res.status(404).json({ message: "Team not found" });
+    return;
+  }
+  res.status(204).send();
+});
 
 export { router };

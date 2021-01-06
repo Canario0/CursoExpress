@@ -1,13 +1,12 @@
 import express from "express";
 import { router as authRouter } from "./app/auth/auth.router";
 import { router as teamsRouter } from "./app/teams/teams.router";
+import { setUpMiddlewares } from "./middlewares";
 
 const app = express();
 const port = 3000;
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+setUpMiddlewares(app);
 
-// Login logic
 // De esta manera podemos añadir prefijos a nuestros proyectos
 // Puediendolo separar en modulos
 app.use("/auth", authRouter);

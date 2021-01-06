@@ -3,10 +3,11 @@ import {
   ExtractJwt,
   StrategyOptions,
 } from "passport-jwt";
-import { PassportStatic } from "passport";
+import passport from "passport";
 import { enviroment } from "../../enviroments/enviroment";
+import { NextFunction, Request, Response } from "express";
 
-function setupAuth(passport: PassportStatic): void {
+function setupAuth(): void {
   const options: StrategyOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     secretOrKey: enviroment.secret,
@@ -21,4 +22,15 @@ function setupAuth(passport: PassportStatic): void {
   );
 }
 
-export { setupAuth };
+function protectedWithJwt(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): void {
+  if (req.path == "/auth/login") {
+    return next();
+  }
+  return passport.authenticate("jwt", { session: false })(req, res, next);
+}
+
+export { setupAuth, protectedWithJwt };

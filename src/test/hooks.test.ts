@@ -1,4 +1,4 @@
-import * as usersController from "../app/tools/users";
+import * as usersController from "../app/auth/user.controller";
 
 before((done) => {
   usersController.registerUser("test", "123");

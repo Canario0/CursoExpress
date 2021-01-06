@@ -1,5 +1,5 @@
 import * as uuid from "uuid";
-import { comparePassword, hashPasswordSync } from "./crypto";
+import { comparePassword, hashPasswordSync } from "../tools/crypto";
 import * as teamsController from "../teams/teams.controller";
 import { User } from "../models/user";
 
