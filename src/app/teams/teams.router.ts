@@ -1,7 +1,7 @@
 import express from "express";
 import passport from "passport";
-import * as authController from "../controllers/auth";
-import * as teamsController from "../controllers/teams";
+import * as authController from "../auth/auth.controller";
+import * as teamsController from "./teams.controller";
 import * as usersController from "../controllers/users";
 import axios from "axios";
 

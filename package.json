@@ -5,8 +5,9 @@
   "main": "./dist/cursoexpress/index.js",
   "type": "commonjs",
   "scripts": {
-    "test": "env TS_NODE_FILES=true mocha --exit -r ts-node/register src/test/**/*.test.ts",
-    "build": "tsc -p ./tsconfig.app.json",
+    "test": "env TS_NODE_FILES=true mocha --exit -r ts-node/register src/test/*.test.ts src/test/**/*.test.ts",
+    "clean": "rm -rf ./dist",
+    "build": "npm run clean && tsc -p ./tsconfig.app.json",
     "start": "npm run build && echo 'compiled!' && node ./dist/cursoexpress/index.js",
     "start:watch": "nodemon"
   },
@@ -36,8 +37,8 @@
     ],
     "ext": "ts,json",
     "ignore": [
-      "src/**.test.ts",
-      "src/**.d.ts"
+      "src/**/*.test.ts",
+      "src/**/*.d.ts"
     ],
     "exec": "npm start"
   },

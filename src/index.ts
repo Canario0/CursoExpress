@@ -1,6 +1,6 @@
 import express from "express";
-import { router as authRouter } from "./app/router/auth";
-import { router as teamsRouter } from "./app/router/teams";
+import { router as authRouter } from "./app/auth/auth.router";
+import { router as teamsRouter } from "./app/teams/teams.router";
 
 const app = express();
 const port = 3000;

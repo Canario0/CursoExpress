@@ -1,6 +1,6 @@
 import { default as chai } from "chai";
 import { default as chaiHttp } from "chai-http";
-import { app } from "../index";
+import { app } from "../../index";
 
 chai.use(chaiHttp);
 

@@ -1,13 +1,13 @@
 import { default as chai } from "chai";
 import { default as chaiHttp } from "chai-http";
-import { app } from "../index";
-import * as teamsController from "../app/controllers/teams";
+import { app } from "../../index";
+import * as teamsController from "../../app/teams/teams.controller";
 
 chai.use(chaiHttp);
 
 describe("Test suite for teams endpoint", () => {
   before((done) => {
-    /* console.log("before teams suite only"); */
+    console.log("before teams suite only");
     done();
   });
   beforeEach((done) => {
