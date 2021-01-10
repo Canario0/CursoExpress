@@ -1,36 +1,39 @@
 import * as uuid from "uuid";
 import { comparePassword, hashPasswordSync } from "../tools/crypto";
 import * as teamsController from "../teams/teams.controller";
-import { User } from "../models/user";
+import { IUserModel, UserModel } from "../models/user";
 
-const userDatabase: Map<string, User> = new Map();
 // userId -> password cifrada
 
 async function registerUser(userName: string, password: string): Promise<void> {
   const hashPassword = hashPasswordSync(password);
   const userUuid = uuid.v4();
-  userDatabase.set(userUuid, {
+  const user: IUserModel = new UserModel({
+    userId: userUuid,
     userName: userName,
     password: hashPassword,
-    salt: "asd",
   });
+  await user.save();
   await teamsController.createTeam(userUuid);
 }
 
 async function cleanUserDatabase(): Promise<void> {
-  userDatabase.clear();
+  await UserModel.deleteMany({}).exec();
 }
 
-async function getUserNameFromId(uuid: string): Promise<string> {
-  const user = userDatabase.get(uuid);
-  if (!user) throw new Error("User not found");
-  return user.userName;
+async function getUserNameFromId(uuid: string): Promise<IUserModel> {
+  const user: IUserModel = await UserModel.findOne({
+    userId: uuid,
+  }).exec();
+  if (user) return user;
+  throw new Error("User nor found");
 }
 
-async function getUserIdFromUserName(userName: string): Promise<string> {
-  for (let [key, user] of userDatabase) {
-    if (user.userName === userName) return key;
-  }
+async function getUserIdFromUserName(userName: string): Promise<IUserModel> {
+  const user: IUserModel = await UserModel.findOne({
+    userName: userName,
+  }).exec();
+  if (user) return user;
   throw new Error("User nor found");
 }
 
@@ -38,8 +41,7 @@ async function checkUserCredentials(
   userName: string,
   password: string
 ): Promise<boolean> {
-  const userId = await getUserIdFromUserName(userName);
-  let user = userDatabase.get(userId);
+  const user = await getUserIdFromUserName(userName);
   return comparePassword(password, user!.password);
 }
 

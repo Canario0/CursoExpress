@@ -1,40 +1,50 @@
-import { Pokemon } from "../models/pokemon";
-
-const teamsDatabase: Map<string, Pokemon[]> = new Map();
+import { ITeamModel, TeamModel } from "../models/team";
+import { IPokemonModel } from "../models/pokemon";
 
 async function cleanTeamDataBase(): Promise<void> {
-  teamsDatabase.forEach((_, key) => teamsDatabase.set(key, []));
+  await TeamModel.deleteMany({}).exec();
 }
 
 async function createTeam(uuid: string): Promise<void> {
-  teamsDatabase.set(uuid, []);
+  const team: ITeamModel = new TeamModel({ userId: uuid, team: [] });
+  await team.save();
 }
 
-async function addPokemon(uuid: string, pokemon: Pokemon): Promise<Pokemon[]> {
-  const team = teamsDatabase.get(uuid);
+async function getTeamByUuid(uuid: string): Promise<ITeamModel> {
+  const team: ITeamModel = await TeamModel.findOne({ userId: uuid });
   if (team == null) throw new Error("Team not found");
-  team.push(pokemon);
   return team;
 }
 
-async function setTeam(uuid: string, team: Pokemon[]): Promise<Pokemon[]> {
-  teamsDatabase.set(uuid, team);
-  return teamsDatabase.get(uuid)!;
+async function setTeam(
+  uuid: string,
+  pokemons: IPokemonModel[]
+): Promise<ITeamModel> {
+  const team: ITeamModel = await getTeamByUuid(uuid);
+  team.team = pokemons;
+  team.save();
+  return team;
 }
 
-async function getTeamByUuid(uuid: string): Promise<Pokemon[]> {
-  const team = teamsDatabase.get(uuid);
-  if (team == null) throw new Error("Team not found");
-  return team!;
+async function addPokemon(
+  uuid: string,
+  pokemon: IPokemonModel
+): Promise<ITeamModel> {
+  const team: ITeamModel = await getTeamByUuid(uuid);
+  if (team.team.length === 6) throw new Error("Already have 6 pokemon");
+  team.team.push(pokemon);
+  await team.save();
+  return team;
 }
 
 async function deletePokemonByPosition(
   uuid: string,
   pokemonNum: number
-): Promise<Pokemon[]> {
-  const team = teamsDatabase.get(uuid);
-  if (!team) throw new Error("Team not found");
-  team.splice(pokemonNum, 1);
+): Promise<ITeamModel> {
+  const team: ITeamModel = await getTeamByUuid(uuid);
+  if (!team.team[pokemonNum]) throw new Error("Pokemon not found");
+  team.team.splice(pokemonNum, 1);
+  team.save();
   return team;
 }
 

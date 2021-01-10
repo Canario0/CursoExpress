@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import * as usersController from "./user.controller";
 import * as jwt from "jsonwebtoken";
-import { enviroment } from "../../enviroments/enviroment";
+import { IUser } from "../models/user";
 
 async function login(req: Request, res: Response): Promise<void> {
   if (!req.body || !req.body.password || !req.body.user) {
@@ -14,8 +14,10 @@ async function login(req: Request, res: Response): Promise<void> {
       req.body.password
     );
     if (validCredentials) {
-      const userId = await usersController.getUserIdFromUserName(req.body.user);
-      const token = jwt.sign({ userId: userId }, enviroment.secret);
+      const user: IUser = <IUser>(
+        await usersController.getUserIdFromUserName(req.body.user)
+      );
+      const token = jwt.sign({ userId: user.userId }, process.env.SECRET!);
       res.status(200).json({
         token: token,
       });

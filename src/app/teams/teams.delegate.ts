@@ -2,13 +2,19 @@ import { Request, Response } from "express";
 import * as usersController from "../auth/user.controller";
 import * as teamsController from "./teams.controller";
 import axios from "axios";
+import { IUser } from "../models/user";
+import { ITeam } from "../models/team";
+import { IPokemon, IPokemonModel, PokemonModel } from "../models/pokemon";
 
 async function getTeamFromUser(req: Request, res: Response): Promise<void> {
   try {
-    const team = await teamsController.getTeamByUuid(req.user!.userId);
+    const team = <ITeam>await teamsController.getTeamByUuid(req.user!.userId);
+    const user = <IUser>(
+      await usersController.getUserNameFromId(req.user!.userId)
+    );
     res.status(200).json({
-      trainer: await usersController.getUserNameFromId(req.user!.userId),
-      team,
+      trainer: user.userName,
+      team: team.team,
     });
   } catch (error) {
     res.status(404).json({ message: error.message });
@@ -20,19 +26,24 @@ async function setTeamdFromUser(req: Request, res: Response): Promise<void> {
     res.status(400).json({ message: "Missing team data" });
     return;
   }
-  if (!req.body.trainer) {
-    res.status(400).json({ message: "Missing trainer data" });
-    return;
+  try {
+    const pokemons = req.body.map(
+      (pokemon: IPokemon) => new PokemonModel(pokemon)
+    );
+    const team: ITeam = <ITeam>(
+      await teamsController.setTeam(req.user!.userId, pokemons)
+    );
+    const user = <IUser>(
+      await usersController.getUserNameFromId(req.user!.userId)
+    );
+    res.status(200).json({
+      trainer: user.userName,
+      team: team.team,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send();
   }
-  if (!req.body.team) {
-    res.status(400).json({ message: "Missing team data" });
-    return;
-  }
-  const team = await teamsController.setTeam(req.user!.userId, req.body.team);
-  res.status(200).json({
-    trainer: await usersController.getUserNameFromId(req.user!.userId),
-    team,
-  });
 }
 
 async function setPokemonToTeam(req: Request, res: Response): Promise<void> {
@@ -50,10 +61,11 @@ async function setPokemonToTeam(req: Request, res: Response): Promise<void> {
       `https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`
     );
     try {
-      await teamsController.addPokemon(req.user!.userId, {
+      const pokemon: IPokemonModel = new PokemonModel({
         name: pokemonName,
         pokedexNum: pokemonData.data.id,
       });
+      await teamsController.addPokemon(req.user!.userId, pokemon);
     } catch (error) {
       res.status(500).json({
         message: error.message,
@@ -61,10 +73,15 @@ async function setPokemonToTeam(req: Request, res: Response): Promise<void> {
       return;
     }
     try {
-      const team = await teamsController.getTeamByUuid(req.user!.userId);
+      const team: ITeam = <ITeam>(
+        await teamsController.getTeamByUuid(req.user!.userId)
+      );
+      const user = <IUser>(
+        await usersController.getUserNameFromId(req.user!.userId)
+      );
       res.status(201).json({
-        trainer: await usersController.getUserNameFromId(req.user!.userId),
-        team,
+        trainer: user.userName,
+        team: team.team,
       });
     } catch (error) {
       res.status(500).json({

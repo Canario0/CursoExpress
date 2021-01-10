@@ -4,13 +4,12 @@ import {
   StrategyOptions,
 } from "passport-jwt";
 import passport from "passport";
-import { enviroment } from "../../enviroments/enviroment";
 import { NextFunction, Request, Response } from "express";
 
 function setupAuth(): void {
   const options: StrategyOptions = {
     jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-    secretOrKey: enviroment.secret,
+    secretOrKey: process.env.SECRET!,
   };
   passport.use(
     new JwtStrategy(options, (decoded, done) => {

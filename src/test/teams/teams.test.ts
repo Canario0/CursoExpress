@@ -1,7 +1,6 @@
 import { default as chai } from "chai";
 import { default as chaiHttp } from "chai-http";
 import { app } from "../../index";
-import * as teamsController from "../../app/teams/teams.controller";
 
 chai.use(chaiHttp);
 
@@ -12,14 +11,17 @@ describe("Test suite for teams endpoint", () => {
   });
   beforeEach(async () => {
     /* console.log("Before teams"); */
-    await teamsController.cleanTeamDataBase();
+    /* await teamsController.cleanTeamDataBase(); */
   });
   after((done) => {
     /* console.log("afer teams suite only"); */
     done();
   });
   it("Get should return the team of the given user", (done) => {
-    const team = [{ name: "Charizar" }, { name: "Blastoise" }];
+    const team = [
+      { name: "Charizard", pokedexNum: 6 },
+      { name: "Blastoise", pokedexNum: 9 },
+    ];
     chai
       .request(app)
       .post("/auth/login")
@@ -32,8 +34,9 @@ describe("Test suite for teams endpoint", () => {
           .put("/teams")
           .set("Authorization", `Bearer ${token}`)
           .type("json")
-          .send({ trainer: "test", team: team })
+          .send(team)
           .end((err, res) => {
+            console.log(err);
             chai
               .request(app)
               .get("/teams")
@@ -54,7 +57,7 @@ describe("Test suite for teams endpoint", () => {
   });
 
   it("Put should update my team", (done) => {
-    const team = [{ name: "Pikachu" }];
+    const team = [{ name: "Pikachu", pokedexNum: 25 }];
     chai
       .request(app)
       .post("/auth/login")
@@ -66,7 +69,7 @@ describe("Test suite for teams endpoint", () => {
           .put("/teams")
           .set("Authorization", `Bearer ${res.body.token}`)
           .type("json")
-          .send({ trainer: "test", team: team })
+          .send(team)
           .end((err, res) => {
             chai.assert.equal(res.status, 200);
             chai.assert.equal(res.body.trainer, "test");
@@ -105,7 +108,10 @@ describe("Test suite for teams endpoint", () => {
   });
 
   it("Delete a pokemon, should remove it from my team", (done) => {
-    const team = [{ name: "Charizar" }, { name: "Blastoise" }];
+    const team = [
+      { name: "Charizard", pokedexNum: 6 },
+      { name: "Blastoise", pokedexNum: 9 },
+    ];
     chai
       .request(app)
       .post("/auth/login")
@@ -118,7 +124,7 @@ describe("Test suite for teams endpoint", () => {
           .put("/teams")
           .set("Authorization", `Bearer ${token}`)
           .type("json")
-          .send({ trainer: "test", team: team })
+          .send(team)
           .end((err, res) => {
             chai
               .request(app)
